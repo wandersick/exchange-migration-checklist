@@ -357,31 +357,31 @@
 
 - Prepare to migrate mailbox
   1. Note
-    - If no target DB is selected while creation of the migration batch, Exchange automatically distributes mailboxes across available mailbox databases
-    - To Exclude a DB from provisioning
-      - Set-MailboxDatabase &quot;DB name&quot; -IsExcludedFromProvisioning $true
+      - If no target DB is selected while creation of the migration batch, Exchange automatically distributes mailboxes across available mailbox databases
+      - To Exclude a DB from provisioning
+        - Set-MailboxDatabase &quot;DB name&quot; -IsExcludedFromProvisioning $true
   2. Schedule backup of the new server (make sure it is successful to backup and restore)
-    - Massive amount of transaction logs could be generated during migration on the destination server which could take significant amount of disk space
-    - May assume 1GB logs per 1GB mailbox data
-    - Keep monitoring disk space usage on target server
+      - Massive amount of transaction logs could be generated during migration on the destination server which could take significant amount of disk space
+      - May assume 1GB logs per 1GB mailbox data
+      - Keep monitoring disk space usage on target server
   3. Migrate arbitration mailboxes first
-    - Check
-      - Get-Mailbox -Arbitration | Select name,database
-    - Do
-      - Get-Mailbox -Arbitration | New-MoveRequest
-      - Get-MoveRequest | Get-MoveRequestStatistics
-    - Verify
-      - Check report &quot;Report: Download the report for this user&quot;. Look for start time and end time, error messages (if failed), etc.
+      - Check
+        - Get-Mailbox -Arbitration | Select name,database
+      - Do
+        - Get-Mailbox -Arbitration | New-MoveRequest
+        - Get-MoveRequest | Get-MoveRequestStatistics
+      - Verify
+        - Check report &quot;Report: Download the report for this user&quot;. Look for start time and end time, error messages (if failed), etc.
   4. Move shared mailboxes and delegates altogether
-    - Chief Executive Officer + his/her assistant
-    - Specific team + specific shared mailbox
-    - Equipment mailboxes + equipment manager
+      - Chief Executive Officer + his/her assistant
+      - Specific team + specific shared mailbox
+      - Equipment mailboxes + equipment manager
   5. Migration speed depends on size of mailboxes, performance of source and destination servers
   6. Online migration: migration can run while users are accessing their mailboxes
   7. Cutover: 95% of mailbox is migrated, then either auto-suspend, require manual completion or auto-complete
-    - Completion stage involves disconnecting end user and displaying a message asking users to restart Outlook
-    - Configure backup to truncate transaction log (which could outgrow available target storage)
-    - Mailbox Provisioning Load Balancer
+      - Completion stage involves disconnecting end user and displaying a message asking users to restart Outlook
+      - Configure backup to truncate transaction log (which could outgrow available target storage)
+      - Mailbox Provisioning Load Balancer
 
 # Decommission Servers
 

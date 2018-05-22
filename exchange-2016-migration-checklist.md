@@ -104,7 +104,7 @@
 - Deprecation of Outlook Anywhere (RPC-over-HTTP) with MAPI-over-HTTP (enabled by default – introduced since Exchange 2013 SP1)
 - Only Mailbox server role and Edge Transport server role (Exchange 2013 additionally includes Client Access Server, while Exchange 2010 includes Hub Transport and Client Access Server)
 - Co-existence: Exchange 2010, 2013 and 2016 can proxy for one another (For Exchange 2010, Outlook Anywhere has to be used)
-  - Exchange requirements
+- Exchange requirements
   - Exchange 2010 SP3 with RU11 or later
   - Exchange 2013 CU10 or later
   - AD requirements

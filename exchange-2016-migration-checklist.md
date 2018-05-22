@@ -356,7 +356,7 @@
       - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -OfflineAddressBook &quot;Default Offline Address Book (Previous Exchange)&quot;
 
 - Prepare to migrate mailbox
-  1. Note
+  1. Exclude mailbox databases from provisioning
       - If no target DB is selected while creation of the migration batch, Exchange automatically distributes mailboxes across available mailbox databases
       - To Exclude a DB from provisioning
         - Set-MailboxDatabase &quot;DB name&quot; -IsExcludedFromProvisioning $true

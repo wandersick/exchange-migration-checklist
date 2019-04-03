@@ -110,6 +110,9 @@
   - AD requirements
     - All domain controllers in the forest must be Windows Server 2008 or later
     - Forest functional level of Windows 2008 or higher (2008 R2 or higher if any Windows Server 2016 Domain Controller is in the environment)
+- Outlook client requirements (Latest available service packs and updates recommended)
+	- Windows: Outlook 2016, 2013, and 2010
+	- Mac OS X: Outlook for Mac for Office 365 / Outlook for Mac 2011
 - Introduction of Public Folder mailboxes – no more legacy Public Folders
 
 # Installing Exchange

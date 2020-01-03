@@ -147,7 +147,7 @@
   - Outbound to the Internet
   - SMTP relay connectors
 
-# Exchange Server 2016 Co-existence Tasks
+# Exchange Server 2016 Co-existence Tasks - Migrating Client Access
 
 - Note
   - Manage object with the matching version of Exchange management tools
@@ -183,10 +183,10 @@
     - Special concerns for Exchange 2010
       - Outlook Anywhere must be enabled
       - Check whether Outlook Anywhere is enabled
-        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | GetClientAccessServer | Select Name,OutlookAnywhereEnabled
+        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
     - IIS authentication must be configured for co-existence
       - Enable Outlook Anywhere and configure IIS authentication
-        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | GetClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere - ClientAuthenticationMethod Basic -SSLOffloading $False - ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
+        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere - ClientAuthenticationMethod Basic -SSLOffloading $False - ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
 3. Test the namespaces
     - Before DNS change (risky), use a hosts file for testing with a pilot group
       - Content of hosts file:
@@ -354,13 +354,13 @@
       - Fix by matching the quota of new server with that of the existing one
         - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -IssueWarningQuota 5GB -ProhibitSendQuota 6GB -ProhibitSendReceiveQuota 10GB
     - Common Issue: Outlook Address Book not configured on existing Exchange servers
-    - Check
-      - Get-OfflineAddressBook
-    - Fix by letting the new server use the OAB of the existing server
-      - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -OfflineAddressBook &quot;Default Offline Address Book (Previous Exchange)&quot;
+      - Check
+        - Get-OfflineAddressBook
+      - Fix by letting the new server use the OAB of the existing server
+        - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -OfflineAddressBook &quot;Default Offline Address Book (Previous Exchange)&quot;
 
 - Prepare to migrate mailbox
-  1. Exclude mailbox databases from provisioning
+  1. Exclude mailbox databases from provisioning (mailbox provisioning load balancer)
       - If no target DB is selected while creation of the migration batch, Exchange automatically distributes mailboxes across available mailbox databases
       - To Exclude a DB from provisioning
         - Set-MailboxDatabase &quot;DB name&quot; -IsExcludedFromProvisioning $true
@@ -385,7 +385,6 @@
   7. Cutover: 95% of mailbox is migrated, then either auto-suspend, require manual completion or auto-complete
       - Completion stage involves disconnecting end user and displaying a message asking users to restart Outlook
       - Configure backup to truncate transaction log (which could outgrow available target storage)
-      - Mailbox Provisioning Load Balancer
 
 # Decommission Servers
 

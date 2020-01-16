@@ -1,5 +1,7 @@
 # Inventorying Existing Environment
 
+This example shows a parent-child domain architecture with DAG, where Exchange server is installed in a child domain with hardware load balancer.
+
 - Have an estimation of how many mailboxes on each existing Exchange server
   - Get-Mailbox | Group-Object -Property:Database | Select Name,Count | ft -auto
 
@@ -115,17 +117,25 @@
 	- Mac OS X: Outlook for Mac for Office 365 / Outlook for Mac 2011
 - Introduction of Public Folder mailboxes – no more legacy Public Folders
 
-# Installing Exchange
+# Installing Exchange - Implementing Exchange Co-Existence
 
-1. Privileges of account used during setup
-    - Domain Admin, Enterprise Admin and Schema Admin
-2. Confirm PowerShell v4.0 is available
-3. Confirm .NET Framework 4.5.2 is available
-4. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
-    - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx)
-5. Schema extensions
-6. Prepare Active Directory
-7. Prepare domains
+1. Prepare privileges of account used during setup - root domain administrator account
+   - Domain Admin, Enterprise Admin and Schema Admin as well as Organization Management
+   - Copy setup media of Exchange and related dependencies (including to a root DC)
+   - Raise forest functional level to 2003 native at a minimum (if required)
+2. Refer to https://docs.microsoft.com/en-us/exchange/plan-and-deploy/prerequisites?view=exchserver-2016 for the latest prerequisites
+3. Confirm PowerShell v4.0 is available
+4. Confirm .NET Framework 4.5.2 is available
+5. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
+   - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx)
+6. Log on to a DC in forest domain
+   - Perform schema extensions: `setup /PrepareSchema /IAcceptExchangeServerLicenseTerms`
+   - Perform Active Directory preparation: `setup /PrepareAD /IAcceptExchangeServerLicenseTerms`
+   - Perform domain preparation: `setup /Preparedomain /IAcceptExchangeServerLicenseTerms`
+7. Add root domain groups to ‘local administrators groups’ on each target Exchange mailbox server in staff domain
+   - `ROOTDOMAIN\Exchange Trusted Subsystem`
+   - `ROOTDOMAIN\Organization Management`
+8. Install Exchange 2016 mailbox servers with root domain administrator account
 
 # Avoiding Possible Impacts
 

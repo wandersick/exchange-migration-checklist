@@ -125,17 +125,20 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
    - Raise forest functional level to 2003 native at a minimum (if required)
 2. Refer to https://docs.microsoft.com/en-us/exchange/plan-and-deploy/prerequisites?view=exchserver-2016 for the latest prerequisites
 3. Confirm PowerShell v4.0 is available
-4. Confirm .NET Framework 4.5.2 is available
-5. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
+4. Confirm .NET Framework 4.8 is available (required for both mailbox and Edge servers)
+5. Confirm Microsoft KB 3206632 is available
+6. Confirm Visual C++ Redistributable for Visual Studio 2012 Update 4 (required for both mailbox and Edge servers) is available
+7. Confirm Visual C++ 2013 Redistributable Package is available
+8. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
    - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx)
-6. Log on to a DC in forest domain
+9. Log on to a DC in forest domain
    - Perform schema extensions: `setup /PrepareSchema /IAcceptExchangeServerLicenseTerms`
    - Perform Active Directory preparation: `setup /PrepareAD /IAcceptExchangeServerLicenseTerms`
    - Perform domain preparation: `setup /Preparedomain /IAcceptExchangeServerLicenseTerms`
-7. Add root domain groups to ‘local administrators groups’ on each target Exchange mailbox server in staff domain
+10. Add root domain groups to ‘local administrators groups’ on each target Exchange mailbox server in staff domain
    - `ROOTDOMAIN\Exchange Trusted Subsystem`
    - `ROOTDOMAIN\Organization Management`
-8. Install Exchange 2016 mailbox servers with root domain administrator account
+11. Install Exchange 2016 mailbox servers with root domain administrator account
 
 # Avoiding Possible Impacts
 

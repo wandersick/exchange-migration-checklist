@@ -174,9 +174,9 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
 2. Configure the client access namespaces
     - Configure each HTTPS service with the same namespace as existing servers (virtual directories)
       - Defining variables
-        - $InternalHostname = &quot;mail.company.com&quot;
-        - $ExternalHostname = &quot;mail.company.com&quot;
-        - $Server = &quot;EXCH16&quot;
+        - $InternalHostname = "mail.company.com"
+        - $ExternalHostname = "mail.company.com"
+        - $Server = "EXCH16"
       - Outlook Anywhere
         - Get-OutlookAnywhere -Server $Server | Set-OutlookAnywhere -ExternalHostname $ExternalHostname -InternalHostname $InternalHostname -ExternalClientsRequiresSsl $True -InternalClientsRequireSSL $true -DefaultAuthenticationMethod NTLM
       - OWA Virtual Directory
@@ -199,7 +199,7 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
         - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
     - IIS authentication must be configured for co-existence
       - Enable Outlook Anywhere and configure IIS authentication
-        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere - ClientAuthenticationMethod Basic -SSLOffloading $False - ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
+        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere - ClientAuthenticationMethod Basic -SSLOffloading $False -ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
 3. Test the namespaces
     - Before DNS change (risky), use a hosts file for testing with a pilot group
       - Content of hosts file:

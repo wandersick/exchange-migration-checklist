@@ -49,6 +49,9 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
       - Get-ExchangeCertificate
     - Take note of CertificateDomains which are covered by the domain, and the validity status
       - Get-ExchangeCertificate -Thumbprint &lt;From\_Above\_Command&gt; | fl
+    - Take note of IMAP and POP3 X509CertificateName parameter from each responsible server which could cause warning of mismatch when enabling certificate for IMAP and POP3 later
+      - Get-IMAPSettings -Server <Server_Name>
+      - Get-POPSettings -Server <Server_Name>
 - Mailbox Storage Quotas
   - Beware of default mailbox quota – For Exchange 2016, it is 2GB by default
     - Mailbox migration fails if size exceeds target database
@@ -177,7 +180,14 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
 
 1. Import the SSL certificate
     - Import from existing server to new server
-    - Use them for SMTP and IIS
+    - Enable it for SMTP and IIS
+      - `Enable-ExchangeCertificate -Server <Server_Name> -Thumbprint <Thumbprint_acquired_from_Get-ExchangeCertificate> -Services SMTP,IIS`
+    - Enable it for IMAP and POP3, configure X509CertificateName of IMAP and POP3 settings accordingly to prevent errors enabling
+      - `Set-IMAPSettings -Server <Server_Name> -X509CertificateName mail.company.com`
+      - `Set-POPSettings -Server <Server_Name> -X509CertificateName mail.company.com`
+      - `Restart-Service <MSExchangePOP3>`
+      - `Restart-Service <MSExchangeIMAP4>`
+      - `Enable-ExchangeCertificate -Server <Server_Name> -Thumbprint <Thumbprint_acquired_from_Get-ExchangeCertificate> -Services POP,IMAP`
 2. Configure the client access namespaces
     - Configure each HTTPS service with the same namespace as existing servers (virtual directories)
       - Defining variables

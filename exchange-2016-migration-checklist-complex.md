@@ -177,8 +177,8 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
         - $InternalHostname = "mail.company.com"
         - $ExternalHostname = "mail.company.com"
         - $Server = "EXCH16"
-      - Outlook Anywhere
-        - Get-OutlookAnywhere -Server $Server | Set-OutlookAnywhere -ExternalHostname $ExternalHostname -InternalHostname $InternalHostname -ExternalClientsRequiresSsl $True -InternalClientsRequireSSL $true -DefaultAuthenticationMethod NTLM
+      - Outlook Anywhere (Basic instead of NTLM, due to firewall not supporting it)
+        - Get-OutlookAnywhere -Server $Server | Set-OutlookAnywhere -ExternalHostname $ExternalHostname -InternalHostname $InternalHostname -ExternalClientsRequiresSsl $True -InternalClientsRequireSSL $true -DefaultAuthenticationMethod Basic
       - OWA Virtual Directory
         - Get-OWAVirtualDirectory -Server $Server | Set-OWAVirtualDirectory -ExternalUrl https://$ExternalHostname/owa -InternalUrl https://$InternalHostname/owa
       - ECP Virtual Directory

@@ -17,18 +17,25 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
       - Get-ClientAccessServer | Select Identity,AutoDiscoverServiceInternalUri
     - Outlook Anywhere (RPC over HTTPS)
       - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity,Internalhostname,Externalhostname | ft -wrap
+      - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity, \*Auth\* | fl
     - OWA
-      - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
     - ECP
-      - Get-ECPVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-ECPVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-ECPVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
     - Offline Address Book (OAB)
-      - Get-OABVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-OABVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-OABVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
     - Exchange Web Services (EWS)
-      - Get-WebServicesVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-WebServicesVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-WebServicesVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
     - MAPI/HTTP
-      - Get-MAPIVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-MAPIVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-MAPIVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
     - ActiveSync
-      - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL
+      - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
 - SSL Certificates
   - For Exchange ActiveSync, Outlook Anywhere, Outlook Web App, etc.
   - Requirements

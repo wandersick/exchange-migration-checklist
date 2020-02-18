@@ -46,7 +46,7 @@
     - Take note of output with **W** which are certificates for IIS (not **I** which are for IMAP)
       - Get-ExchangeCertificate
     - Take note of CertificateDomains which are covered by the domain, and the validity status
-      - Get-ExchangeCertificate -Thumprint &lt;From\_Above\_Command&gt; | fl
+      - Get-ExchangeCertificate -Thumbprint &lt;From\_Above\_Command&gt; | fl
 - Mailbox Storage Quotas
   - Beware of default mailbox quota – For Exchange 2016, it is 2GB by default
     - Mailbox migration fails if size exceeds target database

@@ -14,19 +14,19 @@
     - Autodiscover (SCP)
       - Get-ClientAccessServer | Select Identity,AutoDiscoverServiceInternalUri
     - Outlook Anywhere (RPC over HTTPS)
-      - Get-OutlookAnywhere -ADPropertiesOnly | Select Server,Internalhostname,Externalhostname
+      - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity,Internalhostname,Externalhostname | ft -wrap
     - OWA
-      - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
     - ECP
-      - Get-ECPVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-ECPVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
     - Offline Address Book (OAB)
-      - Get-OABVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-OABVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
     - Exchange Web Services (EWS)
-      - Get-WebServicesVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-WebServicesVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
     - MAPI/HTTP
-      - Get-MAPIVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-MAPIVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
     - ActiveSync
-      - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Server,InternalURL,ExternalURL
+      - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
 - SSL Certificates
   - For Exchange ActiveSync, Outlook Anywhere, Outlook Web App, etc.
   - Requirements

@@ -100,6 +100,9 @@
   - Once an IP address is acquired, perform PTR DNS lookup using nslookup to find out its hostname/FQDN
     - nslookup &lt;IP\_address&gt;
 
+- Maximum allowed message size of Receive Connector
+  - Get-ReceiveConnector | Select Name,MaxMessageSize
+
 - Public Folders
   - Inventorying existing public folders and existing Exchange Server
     - Get-PublicFolder -Recurse | Export-Clixml C:\PFMigration\Legacy\_PFStructure.xml
@@ -111,6 +114,12 @@
     - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} } | fl name,identity
   - Watch out for existing pubic folder migration job
     - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
+
+- Other
+  - Collect information on arbitration mailboxes
+    - Get-Mailbox -Arbitration | Select name,database
+  - Check whether Outlook Anywhere is enabled (on all servers)
+    - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
 
 # Exchange 2016 Changes
 
@@ -129,6 +138,8 @@
 - Introduction of Public Folder mailboxes – no more legacy Public Folders
 
 # Installing Exchange
+
+Note: For this section, it is recommended to also check [Microsoft Docs](https://docs.microsoft.com/en-us/exchange/plan-and-deploy/prerequisites?view=exchserver-2016) for the latest prerequisites.
 
 1. Privileges of account used during setup
     - Domain Admin, Enterprise Admin and Schema Admin

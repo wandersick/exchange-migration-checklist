@@ -1,4 +1,4 @@
-# Inventorying Existing Environment
+# Inventorying Existing Environment (Complex Version in Progress)
 
 This example shows a parent-child domain architecture with DAG, where Exchange server is installed in a child domain with hardware load balancer.
 
@@ -92,6 +92,7 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Virtualization (e.g. vCenter, System Center Virtual Machine Manager)
     - Voice or telephony
     - SMS or fax gateways
+  
   - Acquire info of Receive Connectors (for Relay connectors)
     - Get-ReceiveConnector -Server &lt;Server\_Name&gt;
       - Look for anything other than the below, which probably states &quot;Relay&quot; or something with an address binding or {0.0.0.0:25}
@@ -101,6 +102,9 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-ReceiveConnector &quot;Server\_Name\Receive\_Connector\_Name&quot; | Select RemoteIPRanges
   - Once an IP address is acquired, perform PTR DNS lookup using nslookup to find out its hostname/FQDN
     - nslookup &lt;IP\_address&gt;
+
+- Maximum allowed message size of Receive Connector
+  - Get-ReceiveConnector | Select Name,MaxMessageSize
 
 - Public Folders
   - Inventorying existing public folders and existing Exchange Server
@@ -113,6 +117,12 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} } | fl name,identity
   - Watch out for existing pubic folder migration job
     - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
+
+- Other
+  - Collect information on arbitration mailboxes
+    - Get-Mailbox -Arbitration | Select name,database
+  - Check whether Outlook Anywhere is enabled (on all servers)
+    - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
 
 # Exchange 2016 Changes
 
@@ -130,7 +140,9 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
 	- Mac OS X: Outlook for Mac for Office 365 / Outlook for Mac 2011
 - Introduction of Public Folder mailboxes – no more legacy Public Folders
 
-# Installing Exchange - Implementing Exchange Co-Existence
+# Installing Exchange
+
+Note: For this section, it is recommended to also check [Microsoft Docs](https://docs.microsoft.com/en-us/exchange/plan-and-deploy/prerequisites?view=exchserver-2016) for the latest prerequisites.
 
 1. Prepare privileges of account used during setup - root domain administrator account
    - Domain Admin, Enterprise Admin and Schema Admin as well as Organization Management

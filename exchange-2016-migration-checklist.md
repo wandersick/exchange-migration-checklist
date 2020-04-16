@@ -1,5 +1,8 @@
 # Inventorying Existing Environment
 
+- Start PowerShell Logging
+  - Start-Transcript transcript.log -Append
+
 - Have an estimation of how many mailboxes on each existing Exchange server
   - Get-Mailbox | Group-Object -Property:Database | Select Name,Count | ft -auto
 
@@ -60,7 +63,7 @@
 
 - Email Routing Topology and Transport
   - Internal mail flow between supported Exchange servers (Exchange 2010 &lt;&gt; 2013 &lt;&gt; 2016) is automatic (no further configuration required)
-  - Inbound mail flow to the Internet
+  - Inbound mail flow from the Internet
     - Acquire internal DNS MX record:
       - Resolve-DnsName -Type MX -Name mail.company.com -Server &lt;internal\_DNS&gt;
       - Resolve-DnsName -Type A  -Name mail.company.com -Server &lt;internal\_DNS&gt;
@@ -98,7 +101,7 @@
     - nslookup &lt;IP\_address&gt;
 
 - Public Folders
-  - Inventorying existing public folders n existing Exchange Server
+  - Inventorying existing public folders and existing Exchange Server
     - Get-PublicFolder -Recurse | Export-Clixml C:\PFMigration\Legacy\_PFStructure.xml
   - Acquire existing pubic folder statistics
     - Get-PublicFolderStatistics | Export-Clixml C:\PFMigration\Legacy\_PFStatistics.xml
@@ -206,7 +209,7 @@
         - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
     - IIS authentication must be configured for co-existence
       - Enable Outlook Anywhere and configure IIS authentication
-        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere - ClientAuthenticationMethod Basic -SSLOffloading $False -ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
+        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere -ClientAuthenticationMethod Basic -SSLOffloading $False -ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
 3. Test the namespaces
     - Before DNS change (risky), use a hosts file for testing with a pilot group
       - Content of hosts file:
@@ -445,3 +448,6 @@
   - Get-OfflineAddressBook
 
 - Uninstall Exchange from Control Panel
+
+- Stop PowerShell Logging
+  - Stop-Transcript

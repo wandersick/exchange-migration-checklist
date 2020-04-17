@@ -101,7 +101,7 @@
     - nslookup &lt;IP\_address&gt;
 
 - Maximum allowed message size of Receive Connector
-  - Get-ReceiveConnector | Select Name,MaxMessageSize
+  - Get-ReceiveConnector | Select Identity,MaxMessageSize
 
 - Public Folders
   - Inventorying existing public folders and existing Exchange Server
@@ -239,7 +239,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
   - Change required: no need further setup (automatically established between installed Exchange servers)
   - Common issue: maximum allowed message size setting differs among Exchange servers
   - Compare using PowerShell the MaxMessageSize values among different servers
-    - Get-ReceiveConnector | Select Name,MaxMessageSize
+    - Get-ReceiveConnector | Select Identity,MaxMessageSize
   - Fix using Set-ReceiveConnector
     - Get-ReceiveConnector -Server EXCH16 | Set-ReceiveConnector -MaxMessageSize 45MB
   - Test mail flow by sending an email from one internal mailbox to another

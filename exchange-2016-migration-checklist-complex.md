@@ -123,6 +123,10 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-Mailbox -Arbitration | Select name,database
   - Check whether Outlook Anywhere is enabled (on all servers)
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
+  - Check organization config e.g. whether MAPI over HTTP or Outlook Anywhere is enabled as in https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016
+    - Get-OrganizationConfig
+    - Get-CasMailbox
+    - Get-CasMailbox | fl
 
 # Exchange 2016 Changes
 

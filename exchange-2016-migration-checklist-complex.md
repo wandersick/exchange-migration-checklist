@@ -114,7 +114,7 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
   - Acquire public folder permissions
     - Get-PublicFolder -Recurse | Get-PublicFolderClientPermission | Select Identity, User -ExpandProperty AccessRights | Export-Clixml C:\PFMigration\Legacy\_PFperms.xml
   - Check if existing public folder names have backslash character &quot;\&quot; which is invalid
-    - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} } | fl name,identity
+    - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} | fl name,identity
   - Watch out for existing pubic folder migration job
     - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
 
@@ -318,7 +318,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
     - Acquire public folder permissions
       - Get-PublicFolder -Recurse | Get-PublicFolderClientPermission | Select Identity, User -ExpandProperty AccessRights | Export-Clixml C:\PFMigration\Legacy\_PFperms.xml
     - Check if existing public folder names have backslash character &quot;\&quot; which is invalid
-      - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} } | fl name,identity
+      - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} | fl name,identity
     - Watch out for existing pubic folder migration job
       - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
     - Inventorying existing public folders and migration jobs **on new Exchange Server**

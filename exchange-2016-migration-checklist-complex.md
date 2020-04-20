@@ -125,6 +125,7 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
   - Check organization config e.g. whether MAPI over HTTP or Outlook Anywhere is enabled as in https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016
     - Get-OrganizationConfig
+    - Get-CasMailbox | Select Mapi*
     - Get-CasMailbox
     - Get-CasMailbox | fl
 
@@ -159,7 +160,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 6. Confirm Visual C++ Redistributable for Visual Studio 2012 Update 4 (required for both mailbox and Edge servers) is available
 7. Confirm Visual C++ 2013 Redistributable Package is available
 8. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
-   - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx)
+   - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://docs.microsoft.com/en-us/Exchange/plan-and-deploy/prerequisites?redirectedfrom=MSDN&view=exchserver-2016)
 9. Log on to a DC in forest domain
    - Perform schema extensions: `setup /PrepareSchema /IAcceptExchangeServerLicenseTerms`
    - Perform Active Directory preparation: `setup /PrepareAD /IAcceptExchangeServerLicenseTerms`

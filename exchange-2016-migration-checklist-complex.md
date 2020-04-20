@@ -71,16 +71,16 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
   - Internal mail flow between supported Exchange servers (Exchange 2010 &lt;&gt; 2013 &lt;&gt; 2016) is automatic (no further configuration required)
   - Inbound mail flow from the Internet
     - Acquire internal DNS MX record:
-      - Resolve-DnsName -Type MX -Name mail.company.com -Server &lt;internal\_DNS&gt;
+      - Resolve-DnsName -Type MX -Name company.com -Server &lt;internal\_DNS&gt;
       - Resolve-DnsName -Type A  -Name mail.company.com -Server &lt;internal\_DNS&gt;
     - Alternatively
-      - nslookup -&gt; server internal\_DNS\_Server -&gt; set type=MX -&gt; mail.company.com
+      - nslookup -&gt; server internal\_DNS\_Server -&gt; set type=MX -&gt; company.com
       - nslookup -&gt; server internal\_DNS\_Server -&gt; set type=A -&gt; mail.company.com
-    - Acquire external DNS MX and A record:
-      - Resolve-DnsName -Type MX -Name mail.company.com -Server 8.8.8.8
+    - Acquire external DNS MX and A record (or using [www.mxtoolbox.com](www.mxtoolbox.com)):
+      - Resolve-DnsName -Type MX -Name company.com -Server 8.8.8.8
       - Resolve-DnsName -Type A -Name mail.company.com -Server 8.8.8.8
     - Alternatively
-      - nslookup -&gt; server 8.8.8.8 -&gt; set type=MX -&gt; mail.company.com
+      - nslookup -&gt; server 8.8.8.8 -&gt; set type=MX -&gt; company.com
       - nslookup -&gt; server 8.8.8.8 -&gt; set type=A -&gt; mail.company.com
   - Outbound mail flow to the Internet
     - Acquire info of Send Connectors (for Outbound email)
@@ -129,9 +129,10 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
   - Check organization config e.g. whether MAPI over HTTP is enabled per [Microsoft Docs](https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016)
     - Get-OrganizationConfig
+    - Get-OrganizationConfig | fl *mapi*
   - Check CAS mailbox e.g. whether OWA, ActiveSync, POP3, IMAP, MAPI over HTTP, etc. is enabled per mailbox
     - Get-CasMailbox
-    - Get-CasMailbox | ft name, mapi*
+    - Get-CasMailbox | ft name, *mapi*
 
 # Basic Health Checking
 
@@ -139,8 +140,6 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
   - Test-ServiceHealth
 - Get a count of current email messages in mail queue on Hub Transport servers
   - Get-Queue
-- Check whether replication status is healthy
-  - Test-ReplicationHealth
 - Check MAPI Connectivity
   - Test-MAPIConnectivity
 - Validates that the RPC/HTTP endpoint is able to receive traffic on the Mailbox server
@@ -149,6 +148,8 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
   - Test-OutlookConnectivity -ProbeIdentity "OutlookMapiHttpSelfTestProbe"
 - Check replication status of all mailbox databases (for non-standalone, DAG scenario)
   - Get-MailboxDatabaseCopyStatus *\*
+- Check whether replication status is healthy
+  - Test-ReplicationHealth
 
 # Exchange 2016 Changes
 
@@ -186,7 +187,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
    - Perform schema extensions: `setup /PrepareSchema /IAcceptExchangeServerLicenseTerms`
    - Perform Active Directory preparation: `setup /PrepareAD /IAcceptExchangeServerLicenseTerms`
    - Perform domain preparation: `setup /Preparedomain /IAcceptExchangeServerLicenseTerms`
-10. Add root domain groups to ‘local administrators groups’ on each target Exchange mailbox server in staff domain
+10. Add root domain groups to ‘local administrators groups’ on each target Exchange mailbox server in sub-domain (if applicable)
    - `ROOTDOMAIN\Exchange Trusted Subsystem`
    - `ROOTDOMAIN\Organization Management`
 11. Install Exchange 2016 mailbox servers with root domain administrator account

@@ -124,7 +124,7 @@
     - Get-Mailbox -Arbitration | Select name,database
   - Check whether Outlook Anywhere is enabled (on all servers)
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
-  - Check organization config e.g. whether MAPI over HTTP is enabled per (Microsoft Docs)[https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016]
+  - Check organization config e.g. whether MAPI over HTTP is enabled per [Microsoft Docs](https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016)
     - Get-OrganizationConfig
   - Check CAS mailbox e.g. whether OWA, ActiveSync, POP3, IMAP, MAPI over HTTP, etc. is enabled per mailbox
     - Get-CasMailbox

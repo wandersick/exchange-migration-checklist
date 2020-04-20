@@ -133,6 +133,23 @@ This example shows a parent-child domain architecture with DAG, where Exchange s
     - Get-CasMailbox
     - Get-CasMailbox | ft name, mapi*
 
+# Basic Health Checking
+
+- Check service health
+  - Test-ServiceHealth
+- Get a count of current email messages in mail queue on Hub Transport servers
+  - Get-Queue
+- Check whether replication status is healthy
+  - Test-ReplicationHealth
+- Check MAPI Connectivity
+  - Test-MAPIConnectivity
+- Validates that the RPC/HTTP endpoint is able to receive traffic on the Mailbox server
+  - Test-OutlookConnectivity -ProbeIdentity "OutlookRpcSelfTestProbe"
+- Validates that the MAPI/HTTP endpoint is able to receive traffic on the Mailbox server
+  - Test-OutlookConnectivity -ProbeIdentity "OutlookMapiHttpSelfTestProbe"
+- Check replication status of all mailbox databases (for non-standalone, DAG scenario)
+  - Get-MailboxDatabaseCopyStatus *\*
+
 # Exchange 2016 Changes
 
 - Deprecation of Outlook Anywhere (RPC-over-HTTP) with MAPI-over-HTTP (enabled by default – introduced since Exchange 2013 SP1)

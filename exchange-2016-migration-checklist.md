@@ -5,6 +5,7 @@
 
 - List existing Exchange servers in the environment
   - Get-ExchangeServer | ft Name, Edition, AdminDisplayVersion
+  - Get-Command ExSetup | ForEach {$_.FileVersionInfo}
 
 - Have an estimation of how many mailboxes on each existing Exchange server
   - Get-Mailbox | Group-Object -Property:Database | Select Name,Count | ft -auto

@@ -3,6 +3,9 @@
 - Start PowerShell Logging
   - Start-Transcript transcript.log -Append
 
+- List existing Exchange servers in the environment
+  - Get-ExchangeServer | ft Name, Edition, AdminDisplayVersion
+
 - Have an estimation of how many mailboxes on each existing Exchange server
   - Get-Mailbox | Group-Object -Property:Database | Select Name,Count | ft -auto
 
@@ -120,6 +123,11 @@
     - Get-Mailbox -Arbitration | Select name,database
   - Check whether Outlook Anywhere is enabled (on all servers)
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
+  - Check organization config e.g. whether MAPI over HTTP is enabled per (Microsoft Docs)[https://docs.microsoft.com/en-us/exchange/clients/mapi-over-http/configure-mapi-over-http?view=exchserver-2016]
+    - Get-OrganizationConfig
+  - Check CAS mailbox e.g. whether OWA, ActiveSync, POP3, IMAP, MAPI over HTTP, etc. is enabled per mailbox
+    - Get-CasMailbox
+    - Get-CasMailbox | ft name, mapi*
 
 # Exchange 2016 Changes
 

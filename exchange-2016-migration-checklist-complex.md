@@ -193,6 +193,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
    - `ROOTDOMAIN\Organization Management`
 11. Install Exchange 2016 mailbox servers with root domain administrator account
 12. Install product key
+    - Set-ExchangeServer <Server_Name> -ProductKey xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
 
 # Avoiding Possible Impacts
 

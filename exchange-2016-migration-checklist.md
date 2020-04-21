@@ -172,16 +172,20 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 1. Privileges of account used during setup
     - Domain Admin, Enterprise Admin and Schema Admin
 2. Confirm PowerShell v4.0 is available
-4. Confirm .NET Framework 4.8 is available (required for both mailbox and Edge servers)
-5. Confirm Microsoft KB 3206632 is available
-6. Confirm Visual C++ Redistributable for Visual Studio 2012 Update 4 (required for both mailbox and Edge servers) is available
-7. Confirm Visual C++ 2013 Redistributable Package is available
-8. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
+3. Confirm .NET Framework 4.8 is available (required for both mailbox and Edge servers)
+4. Confirm Microsoft KB 3206632 is available
+5. Confirm Visual C++ Redistributable for Visual Studio 2012 Update 4 (required for both mailbox and Edge servers) is available
+6. Confirm Visual C++ 2013 Redistributable Package is available
+7. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
    - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://docs.microsoft.com/en-us/Exchange/plan-and-deploy/prerequisites?redirectedfrom=MSDN&view=exchserver-2016)
-8. Schema extensions
-9. Prepare Active Directory
-10. Prepare domains
-11. Install product key
+8. Perform schema extensions
+    - setup /PrepareSchema /IAcceptExchangeServerLicenseTerms
+9. Perform Active Directory preparation
+    - setup /PrepareAD /IAcceptExchangeServerLicenseTerms
+10. Perform domain preparation
+    - setup /Preparedomain /IAcceptExchangeServerLicenseTerms
+11.  Install product key
+    - Set-ExchangeServer <Server_Name> -ProductKey xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
 
 # Avoiding Possible Impacts
 

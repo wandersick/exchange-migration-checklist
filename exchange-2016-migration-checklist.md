@@ -1,10 +1,7 @@
 # Inventorying Existing Environment
 
-- Start PowerShell Logging
-  - Start-Transcript transcript.log -Append
-
 - List existing Exchange servers in the environment
-  - Get-ExchangeServer | ft Name, Edition, AdminDisplayVersion
+  - Get-ExchangeServer | ft Name, Edition, AdminDisplayVersion, ProductId, IsExchangeTrialEdition |  ft -autosize -wrap
   - Get-Command ExSetup | ForEach {$_.FileVersionInfo}
 
 - Have an estimation of how many mailboxes on each existing Exchange server
@@ -114,7 +111,7 @@
     - Get-PublicFolderStatistics | Export-Clixml C:\PFMigration\Legacy\_PFStatistics.xml
   - Acquire public folder permissions
     - Get-PublicFolder -Recurse | Get-PublicFolderClientPermission | Select Identity, User -ExpandProperty AccessRights | Export-Clixml C:\PFMigration\Legacy\_PFperms.xml
-  - Check if existing public folder names have backslash character &quot;\&quot; which is invalid
+  - Check if existing public folder names have backslash character which is invalid
     - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} | fl name,identity
   - Watch out for existing pubic folder migration job
     - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
@@ -147,6 +144,10 @@
   - Get-MailboxDatabaseCopyStatus *\*
 - Check whether replication status is healthy
   - Test-ReplicationHealth
+- Check server component state
+  - Get-ExchangeServer | Get-ServerComponentState
+- Run additional third-party health checking scripts as required, [for example](https://practical365.com/exchange-server/powershell-script-exchange-server-health-check-report/)
+  - Test-ExchangeServerHealth.ps1 -ReportMode -Log
 
 # Exchange 2016 Changes
 
@@ -180,6 +181,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 8. Schema extensions
 9. Prepare Active Directory
 10. Prepare domains
+11. Install product key
 
 # Avoiding Possible Impacts
 
@@ -333,7 +335,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - Get-PublicFolderStatistics | Export-Clixml C:\PFMigration\Legacy\_PFStatistics.xml
     - Acquire public folder permissions
       - Get-PublicFolder -Recurse | Get-PublicFolderClientPermission | Select Identity, User -ExpandProperty AccessRights | Export-Clixml C:\PFMigration\Legacy\_PFperms.xml
-    - Check if existing public folder names have backslash character &quot;\&quot; which is invalid
+    - Check if existing public folder names have backslash character which is invalid
       - Get-PublicFolderStatistics -ResultSize Unlimited | Where {$\_.Name -Like &quot;\*\\*&quot;} | fl name,identity
     - Watch out for existing pubic folder migration job
       - Get-OrganizationConfig | fl PublicFoldersLockedforMigration,PublicFolderMigrationComplete
@@ -487,5 +489,13 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 
 - Uninstall Exchange from Control Panel
 
+# Techniques
+
+- Start PowerShell Logging (append mode)
+  - Start-Transcript transcript.log -Append
 - Stop PowerShell Logging
   - Stop-Transcript
+- Connect to Other Exchange Servers
+  - Connect-ExchangeServer MBX01 -ClientApplication:ManagementShell
+- Invoke standard PowerShell commands on remote computers using PowerShell Remoting
+  - Invoke-Command -ComputerName MBX01,MBX02 -ScriptBlock {Restart-Service -ServiceName MSExchangeIS}

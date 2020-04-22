@@ -5,7 +5,7 @@
   - Get-Command ExSetup | ForEach {$_.FileVersionInfo}
 
 - Have an estimation of how many mailboxes on each existing Exchange server
-  - Get-Mailbox | Group-Object -Property:Database | Select Name,Count | ft -auto
+  - Get-Mailbox -ResultSize Unlimited | Group-Object -Property:Database | Select Name,Count | ft -auto
 
 - Collect AD forest functional level info
   - Get-ADForest
@@ -17,9 +17,11 @@
   - Inventory PowerShell – Collect internal and external domain names for each of the below
     - Autodiscover (SCP)
       - Get-ClientAccessServer | Select Identity,AutoDiscoverServiceInternalUri
-    - Outlook Anywhere (RPC over HTTPS)
+    - Outlook Anywhere (RPC over HTTP)
       - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity,Internalhostname,Externalhostname | ft -wrap
-      - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity, \*Auth\* | fl
+      - Get-OutlookAnywhere -ADPropertiesOnly | Select Identity, \*Auth\*, \*SSL\*, MetabasePath | fl
+      - If Exchange 2010 is in the environment, check if Outlook Anywhere is enabled (required for coexistence)
+        - Get-ExchangeServer | Where {($_.AdminDisplayVersion -Like "Version 14*") -And ($_.ServerRole -Like "*ClientAccess*")} | Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
     - OWA
       - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
       - Get-OWAVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
@@ -38,6 +40,12 @@
     - ActiveSync
       - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
       - Get-ActiveSyncVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
+    - PowerShell
+      - Get-PowerShellVirtualDirectory -ADPropertiesOnly | Select Identity,InternalURL,ExternalURL | ft -wrap
+      - Get-PowerShellVirtualDirectory -ADPropertiesOnly | Select Identity,\*Auth\* | fl
+      - Related error: Unlike other virtual directories, for the PowerShell one, it should remain configured with namespaces (URLs) that match the server's FQDN, which is the default setting. Otherwise, errors like below may be produced with remote administration utilities:
+        > Connecting to remote server mail.company.com failed with the following error message : WinRM cannot process the request. The following error occurred while using Kerberos authentication: Cannot find the computer mail.company.com. Verify that the computer exists on the network and that the name provided is spelled correctly. For more information, see the about_Remote_Troubleshooting Help topic.
+        
 - SSL Certificates
   - For Exchange ActiveSync, Outlook Anywhere, Outlook Web App, etc.
   - Requirements
@@ -52,12 +60,14 @@
     - Take note of CertificateDomains which are covered by the domain, and the validity status
       - Get-ExchangeCertificate -Thumbprint &lt;From\_Above\_Command&gt; | fl
     - Take note of IMAP and POP3 X509CertificateName parameter from each responsible server which could cause warning of mismatch when enabling certificate for IMAP and POP3 later
+      - Get-IMAPSettings
       - Get-IMAPSettings -Server <Server_Name>
+      - Get-POPSettings
       - Get-POPSettings -Server <Server_Name>
 - Mailbox Storage Quotas
   - Beware of default mailbox quota – For Exchange 2016, it is 2GB by default
     - Mailbox migration fails if size exceeds target database
-    - New databases should be configured with same or larger quotas
+    - New databases should be configured with the same or larger quotas
   - Inventory PowerShell (second command supports querying Exchange 2010, if exists, from newer Exchange Management Shell)
     - Get-MailboxDatabase | Select Name,\*Quota\*
     - Get-MailboxDatabase -IncludePreExchange2013| Select Name,\*Quota\*
@@ -96,13 +106,14 @@
       - Look for anything other than the below, which probably states &quot;Relay&quot; or something with an address binding or {0.0.0.0:25}
       - For Exchange 2010, ignore &quot;Default &lt;Server\_Name&gt;&quot; and &quot;Client &lt;Server\_Name&gt;&quot;
       - For Exchange 2013, ignore &quot;Default &lt;Server\_Name&gt;&quot;, &quot;Client Proxy &lt;Server\_Name&gt;&quot;, &quot;Default Frontend &lt;Server\_Name&gt;&quot;, &quot;Outbound Proxy Frontend &lt;Server\_Name&gt;&quot;, &quot;Client Frontend &lt;Server\_Name&gt;&quot;
-  - Once found out, look for the remote IP Ranges of it (i.e. IP addresses which are allowed to relay email via that Exchange server
-    - Get-ReceiveConnector &quot;Server\_Name\Receive\_Connector\_Name&quot; | Select RemoteIPRanges
+  - Once found out, look for the remote IP Ranges of it (i.e. IP addresses which are allowed to relay email via that Exchange server and other settings
+    - Get-ReceiveConnector &quot;Server\_Name\Receive\_Connector\_Name&quot; | fl Name, Server, Enabled, Bindings, TransportRole, RemoteIPRanges, PermissionGroups
+    - Get-ReceiveConnector -Identity &quot;Server\_Name\Receive\_Connector\_Name&quot; | Get-ADPermission
   - Once an IP address is acquired, perform PTR DNS lookup using nslookup to find out its hostname/FQDN
     - nslookup &lt;IP\_address&gt;
 
 - Maximum allowed message size of Receive Connector
-  - Get-ReceiveConnector | Select Identity,MaxMessageSize
+  - Get-ReceiveConnector | Select Identity, MaxMessageSize
 
 - Public Folders
   - Inventorying existing public folders and existing Exchange Server
@@ -118,6 +129,7 @@
 
 - Other
   - Collect information on arbitration mailboxes
+    - Set-ADServerSettings -ViewEntireForest:$true
     - Get-Mailbox -Arbitration | Select name,database
   - Check whether Outlook Anywhere is enabled (on all servers)
     - Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
@@ -125,8 +137,11 @@
     - Get-OrganizationConfig
     - Get-OrganizationConfig | fl *mapi*
   - Check CAS mailbox e.g. whether OWA, ActiveSync, POP3, IMAP, MAPI over HTTP, etc. is enabled per mailbox
-    - Get-CasMailbox
-    - Get-CasMailbox | ft name, *mapi*
+    - Get-CasMailbox -ResultSize Unlimited
+    - Get-CasMailbox -ResultSize Unlimited | ft name, *mapi*
+  - Outlook Address Book configuration
+    - Get-OfflineAddressBook
+    - Get-OfflineAddressBook | fl name,virtual*,guid,global*
 
 # Basic Health Checking
 
@@ -142,10 +157,11 @@
   - Test-OutlookConnectivity -ProbeIdentity "OutlookMapiHttpSelfTestProbe"
 - Check replication status of all mailbox databases (for non-standalone, DAG scenario)
   - Get-MailboxDatabaseCopyStatus *\*
+  - Get-MailboxDatabaseCopyStatus *\* | select name, *activ* | ft
 - Check whether replication status is healthy
   - Test-ReplicationHealth
 - Check server component state
-  - Get-ExchangeServer | Get-ServerComponentState
+  - Get-ExchangeServer | Get-ServerComponentState | ft -wrap -autosize
 - Run additional third-party health checking scripts as required, [for example](https://practical365.com/exchange-server/powershell-script-exchange-server-health-check-report/)
   - Test-ExchangeServerHealth.ps1 -ReportMode -Log
 
@@ -178,12 +194,12 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 6. Confirm Visual C++ 2013 Redistributable Package is available
 7. Confirm Windows components and Unified Communications Managed API 4.0 Core Runtime 64-bit are installed
    - Acquire the PowerShell command (Install-WindowsFeature…) to install Windows components from [https://technet.microsoft.com/en-us/library/bb691354%28v=exchg.160%29.aspx](https://docs.microsoft.com/en-us/Exchange/plan-and-deploy/prerequisites?redirectedfrom=MSDN&view=exchserver-2016)
-8. Perform schema extensions
+8. Perform schema extensions (not required if `/PrepareAD` is run)
     - setup /PrepareSchema /IAcceptExchangeServerLicenseTerms
 9. Perform Active Directory preparation
     - setup /PrepareAD /IAcceptExchangeServerLicenseTerms
-10. Perform domain preparation
-    - setup /Preparedomain /IAcceptExchangeServerLicenseTerms
+10. Perform domain preparation (only required if there are multiple domains)
+    - setup /PrepareAllDomains /IAcceptExchangeServerLicenseTerms
 11.  Install product key
     - Set-ExchangeServer <Server_Name> -ProductKey xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
 
@@ -201,6 +217,10 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - Get-ClientAccessServer -Identity EXCH16 | Select Name,AutoDiscoverServiceInternalUri
       - Set-ClientAccessServer -Identity EXCH16 -AutoDiscoverServiceInternalUri [https://mail.company.com/Autodisocver/Autodiscover.xml](https://mail.company.com/Autodisocver/Autodiscover.xml)
     - Ignore the AutoDiscover virtual directory setting which is not used for AutoDiscover – only SCP is used for AutoDiscover in an internal environment
+  - IMAP
+    - Internal proxying may have problem with IMAP when proxying from Exchange 2016 to Exchange 2010 in a mixed exchange 2010-2016 coexistence setup, in which a mailbox which is hosted on the Exchange 2010 server cannot be opened when connecting through the Exchange 2016 servers, while opening a mailbox with IMAP on Exchange 2010 or Exchange 2016 directly is OK
+    - To solve it, Set EnableGSSAPIAndNTLMAuth to false on new Exchange 2016 servers
+      - Set-ImapSettings -EnableGSSAPIAndNTLMAuth:$false
 - Mail flow
   - Internal to Internal Exchange servers
   - Inbound from the Internet
@@ -216,7 +236,18 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
   - Internal Exchange to Exchange mail flow is automatic for Exchange 2010, 2013 and 2016 (Outlook Anywhere is leveraged)
 
 1. Import the SSL certificate
+      - Do this ASAP to prevent clients from connecting to server which prompts below certificate error in Outlook desktop client
+      > server_name.domain_name
+      > Information you exchange with this site cannot be viewed or changed by others. However, there is a problem with the site's security certificate.
+      > X The security certificate was issued by a company you have not chosen to trust, View the certificate to determine whether you want to trust the certifying authority
+      > ✔ The security certificate date is valid. 
+      > ✔ The security certificate has a valid name.
+      > Do you want to proceed?
     - Import from existing server to new server
+      - In MMC Console, add Certificates snap-in, select Computer account (Local Computer), then import the private key (.pfx) under Personal > Certificates folder
+      - Related error: If this is not done, Outlook users may receive an error prompt due to the self-signed certificate being used:
+          > There is a problem with the proxy server's security certificate. The security certificate is not from a trusted certifying authority.
+          Outlook is unable to connect to the proxy server [servername] (Error Code 8).
     - Enable it for SMTP and IIS
       - `Enable-ExchangeCertificate -Server <Server_Name> -Thumbprint <Thumbprint_acquired_from_Get-ExchangeCertificate> -Services SMTP,IIS`
     - Enable it for IMAP and POP3, configure X509CertificateName of IMAP and POP3 settings accordingly to prevent errors enabling
@@ -225,14 +256,14 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - `Restart-Service <MSExchangePOP3>`
       - `Restart-Service <MSExchangeIMAP4>`
       - `Enable-ExchangeCertificate -Server <Server_Name> -Thumbprint <Thumbprint_acquired_from_Get-ExchangeCertificate> -Services POP,IMAP`
-2. Configure the client access namespaces
+3. Configure the client access namespaces
     - Configure each HTTPS service with the same namespace as existing servers (virtual directories)
       - Defining variables
         - $InternalHostname = "mail.company.com"
         - $ExternalHostname = "mail.company.com"
         - $Server = "EXCH16"
       - Outlook Anywhere
-        - Get-OutlookAnywhere -Server $Server | Set-OutlookAnywhere -ExternalHostname $ExternalHostname -InternalHostname $InternalHostname -ExternalClientsRequiresSsl $True -InternalClientsRequireSSL $true -DefaultAuthenticationMethod NTLM
+        - Get-OutlookAnywhere -Server $Server | Set-OutlookAnywhere -ExternalHostname $ExternalHostname -InternalHostname $InternalHostname -ExternalClientsRequireSsl $True -InternalClientsRequireSSL $true -DefaultAuthenticationMethod NTLM
       - OWA Virtual Directory
         - Get-OWAVirtualDirectory -Server $Server | Set-OWAVirtualDirectory -ExternalUrl https://$ExternalHostname/owa -InternalUrl https://$InternalHostname/owa
       - ECP Virtual Directory
@@ -240,30 +271,29 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - ActiveSync Virtual Directory
         - Get-ActiveSyncVirtualDirectory -Server $Server | Set-ActiveSyncVirtualDirectory -ExternalUrl https://$ExternalHostname/Microsoft-Server-ActiveSync -InternalUrl https://$InternalHostname/Microsoft-Server-ActiveSync
       - EWS (Exchange Web Services) Virtual Directory
-        - Get-WebServcesVirtualDirectory -Server $Server | Set-WebServicesVirtualDirectory -ExternalUrl https://$ExternalHostname/EWS/Exchange.asmx -InternalUrl https://$InternalHostname/EWS/Exchange.asmx
+        - Get-WebServicesVirtualDirectory -Server $Server | Set-WebServicesVirtualDirectory -ExternalUrl https://$ExternalHostname/EWS/Exchange.asmx -InternalUrl https://$InternalHostname/EWS/Exchange.asmx
       - OAB (Offline Address Book) Virtual Directory
         - Get-OabVirtualDirectory -Server $Server | Set-OabVirtualDirectory -ExternalUrl https://$ExternalHostname/OAB -InternalUrl https://$InternalHostname/OAB
       - MAPI Virtual Directory
-        - Get-MapiVirtualDirectory -Server $Server | Set-MapiVirtualDirectory -ExternalUrl https://$ExternalHostname/mapi -InternalUrl [https://$InternalHostname/mapi](https://%24InternalHostname/mapi)
+        - Get-MapiVirtualDirectory -Server $Server | Set-MapiVirtualDirectory -ExternalUrl https://$ExternalHostname/mapi -InternalUrl -InternalUrl https://$InternalHostname/mapi
       - Note: These changes do not make client connect to new Exchange server immediately; client will still connect to where DNS is resolving the namespace
     - Ensure new Exchange server uses existing authentication (e.g. form-based authentication with the same logon format)
     - Special concerns for Exchange 2010
       - Outlook Anywhere must be enabled
       - Check whether Outlook Anywhere is enabled
         - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Select Name,OutlookAnywhereEnabled
-    - IIS authentication must be configured for co-existence
-      - Enable Outlook Anywhere and configure IIS authentication
-        - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere -ClientAuthenticationMethod Basic -SSLOffloading $False -ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
-3. Test the namespaces
+    - Enable Outlook Anywhere and configure IIS authentication (required for co-existence) with existing Exchange 2010 (CAS)
+      - Get-ExchangeServer | Where {($\_.AdminDisplayVersion -Like &quot;Version 14\*&quot;) -And ($\_.ServerRole -Like &quot;\*ClientAccess\*&quot;)} | Get-ClientAccessServer | Where {$\_.OutlookAnywhereEnabled -Eq $False} | Enable-OutlookAnywhere -ClientAuthenticationMethod Basic -SSLOffloading $False -ExternalHostName $hostname -IISAuthenticationMethods NTLM, Basic
+4. Test the namespaces
     - Before DNS change (risky), use a hosts file for testing with a pilot group
       - Content of hosts file:
         - IP\_Address\_of\_Exchange\_2016 mail.company.com
-4. Cutover namespaces to Exchange 2016
+5. Cutover namespaces to Exchange 2016
     - Lower DNS TTL to 1 minute (done earlier than what the TTL specifies)
     - Make DNS change for internal client (e.g. AD DNS server)
     - Make firewall change for external client (NAT settings)
-5. New Exchange server is in production for client connectivity now
-6. Test using exrca &gt; Exchange Server &gt; Microsoft Outlook Connectivity Tests &gt; Outlook Connectivity
+6. New Exchange server is in production for client connectivity now
+7. Test using exrca &gt; Exchange Server &gt; Microsoft Outlook Connectivity Tests &gt; Outlook Connectivity
     - Usual to see a few failed Autodiscover items, as long as the overall Autodiscover is successful
 
 # Migrating Mail Flow
@@ -287,6 +317,8 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
 
 - Outbound mail flow to the Internet
   - Change required: EAC &gt; Mail Flow &gt; Edit Send Connector &gt; Source Server: Remove existing Exchange server; ensure only new Exchange server is in the list
+    - Related error: Be sure to check firewall and/or smart host (if in use) for settings required to enable newly introduced Exchange servers to relay email messages; other users using new servers to send emails (as part of being in the Source Server setting of Exchange Send Connector) may receive bounce-back messages with 550 error.
+      > Generating server: <New_Exchange_Server>. Remote Server returned '550 Relay not permitted'
   - Analyze mail routing by pasting email header into exrca &gt; Message Analyzer
 
 - Devices and applications that use SMTP relay
@@ -297,14 +329,16 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - Role: Frontend Transport
       - Type: Custom
       - Edit remote network settings by removing default 0.0.0.0-255.255.255.255 and adding IP addresses of devices and applications which send via this relay connector
+        - New-ReceiveConnector -Name "Relay EXCH16" -Server &lt;Server_Name&gt; -TransportRole FrontendTransport -Custom -Bindings 0.0.0.0:25 -RemoteIpRanges &lt;RemoteIPAddresses&gt;
     - Security tab
       - Tick &quot;Anonymous users&quot; under permission groups (leave all else unchecked except the first checkbox of TLS authentication)
+        - Set-ReceiveConnector -Identity &quot;SERVER\Relay EXCH16&quot; -PermissionGroups AnonymousUsers
   - Allow Exchange relay connector to relay email sent to external recipient
     - Get-ReceiveConnector &quot;EXCH16\Relay EXCH16&quot; | Add-ADPermission -User &#39;NT Authority\Anonymous Logon&#39; -ExtendedRights MS-Exch-SMTP-Accept-Any-Recipient
   - Fix existing misconfiguration on devices and applications (if any)
   - DNS alias should exist for SMTP, e.g. smtp.company.com
   - Devices and applications should be using DNS alias instead of the hostname or IP address of the server
-  - Take the chance of migration to fix any nonoptimal settings
+  - Take the chance of migration to fix any non-optimal settings
 
 # Migrating Public Folder
 
@@ -418,12 +452,12 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
     - Common Issue: Mailbox quota differs among different databases on existing and new servers (default: 2GB)
       - Acquire the existing quota information
         - Get-MailboxDatabase -IncludePreExchange2013 | Select Name,IssueWarningQuota,ProhibitSendQuota,ProhibitSendReceiveQuota
-      - Fix by matching the quota of new server with that of the existing one
-        - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -IssueWarningQuota 5GB -ProhibitSendQuota 6GB -ProhibitSendReceiveQuota 10GB
+      - Fix it by matching the quota of new server with that of the existing one
+        - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -IssueWarningQuota 5GB -ProhibitSendQuota 6GB -ProhibitSendReceiveQuota 10GB -CalendarLoggingQuota Unlimited
     - Common Issue: Outlook Address Book not configured on existing Exchange servers
       - Check
         - Get-OfflineAddressBook
-      - Fix by letting the new server use the OAB of the existing server
+      - Fix it by letting the new server use the OAB of the existing server
         - Get-MailboxDatabase -Server EXCH16 | Set-MailboxDatabase -OfflineAddressBook &quot;Default Offline Address Book (Previous Exchange)&quot;
 
 - Prepare to migrate mailbox
@@ -435,13 +469,15 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
       - Massive amount of transaction logs could be generated during migration on the destination server which could take significant amount of disk space
       - May assume 1GB logs per 1GB mailbox data
       - Keep monitoring disk space usage on target server
-  3. Migrate arbitration mailboxes first
+  3. Migrate arbitration mailboxes first (it is recommended to move all arbitration mailboxes to the latest version of Exchange [as soon as possible](https://blog.rmilne.ca/2016/09/15/when-to-move-arbitration-mailboxes/), after verifying the health of the latest installation. Do not migrate user mailboxes until it is done.)
       - Check
+        - Set-ADServerSettings -ViewEntireForest:$true
         - Get-Mailbox -Arbitration | Select name,database
       - Do
-        - Get-Mailbox -Arbitration | New-MoveRequest
-        - Get-MoveRequest | Get-MoveRequestStatistics
+        - Get-Mailbox -Arbitration &lt;Legacy_Database_Name&gt; | New-MoveRequest -TargetDatabase &lt;Target Database&gt;
       - Verify
+        - Get-MoveRequest
+        - Get-MoveRequest | Get-MoveRequestStatistics
         - Check report &quot;Report: Download the report for this user&quot;. Look for start time and end time, error messages (if failed), etc.
   4. Move shared mailboxes and delegates altogether
       - Chief Executive Officer + his/her assistant
@@ -499,6 +535,8 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
   - Start-Transcript transcript.log -Append
 - Stop PowerShell Logging
   - Stop-Transcript
+- Add Exchange PowerShell Snap-in (for launching Exchange Management Shell from standard PowerShell prompt)
+  - Add-PsSnapin *exch*
 - Connect to Other Exchange Servers
   - Connect-ExchangeServer MBX01 -ClientApplication:ManagementShell
 - Invoke standard PowerShell commands on remote computers using PowerShell Remoting

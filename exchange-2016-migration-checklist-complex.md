@@ -222,7 +222,7 @@ Note: For this section, it is recommended to also check [Microsoft Docs](https:/
     - Newly installed Exchange server has a default SCP URI of the server&#39;s FQDN (e.g. EXCH16.company.com), which generates certificate errors
     - Fix:
       - Get-ClientAccessServer -Identity EXCH16 | Select Name,AutoDiscoverServiceInternalUri
-      - Set-ClientAccessServer -Identity EXCH16 -AutoDiscoverServiceInternalUri [https://mail.company.com/Autodisocver/Autodiscover.xml](https://mail.company.com/Autodisocver/Autodiscover.xml)
+      - Set-ClientAccessServer -Identity EXCH16 -AutoDiscoverServiceInternalUri [https://mail.company.com/Autodiscover/Autodiscover.xml](https://mail.company.com/Autodiscover/Autodiscover.xml)
     - Ignore the AutoDiscover virtual directory setting which is not used for AutoDiscover – only SCP is used for AutoDiscover in an internal environment
   - IMAP
     - Internal proxying may have problem with IMAP when proxying from Exchange 2016 to Exchange 2010 in a mixed exchange 2010-2016 coexistence setup, in which a mailbox which is hosted on the Exchange 2010 server cannot be opened when connecting through the Exchange 2016 servers, while opening a mailbox with IMAP on Exchange 2010 or Exchange 2016 directly is OK

@@ -156,8 +156,8 @@
 - Validates that the MAPI/HTTP endpoint is able to receive traffic on the Mailbox server
   - Test-OutlookConnectivity -ProbeIdentity "OutlookMapiHttpSelfTestProbe"
 - Check replication status of all mailbox databases (for non-standalone, DAG scenario)
-  - Get-MailboxDatabaseCopyStatus *\*
-  - Get-MailboxDatabaseCopyStatus *\* | select name, *activ* | ft
+  - Get-MailboxDatabaseCopyStatus \*\\\*
+  - Get-MailboxDatabaseCopyStatus \*\\\* | select name, *activ* | ft
 - Check whether replication status is healthy
   - Test-ReplicationHealth
 - Check server component state
